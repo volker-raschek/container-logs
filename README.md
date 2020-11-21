@@ -54,9 +54,18 @@ The flag `--n, --name` can be used multiple times to select multiple containers.
 ### Logs by container id
 
 The behaviour of `-i, --id` is similar to `-n, --name`. It can be specified
-multiple times. It selects by the ID of the container instead of by name. The ID
-does not need to be specified fully qualified. The first characters of the ID
-are sufficient.
+multiple times. It selects the container by thir ID instead of their name. The
+ID does not need to be specified by their full length. The first characters of
+the ID are sufficient.
+
+For example to select the container oracle.
+
+```bash
+$ container-logs --id 9d0bb88fa6a1
+[0.000] 127.0.0.1 - - [20/Nov/2020:18:57:16 +0000] "HEAD /index.html HTTP/1.1" 200 0 "-" "curl/7.29.0" "-"
+[0.000] 127.0.0.1 - - [20/Nov/2020:18:57:56 +0000] "HEAD /index.html HTTP/1.1" 200 0 "-" "curl/7.29.0" "-"
+[0.000] 127.0.0.1 - - [20/Nov/2020:18:58:37 +0000] "HEAD /index.html HTTP/1.1" 200 0 "-" "curl/7.29.0" "-"
+```
 
 ### Logs by container labels
 
