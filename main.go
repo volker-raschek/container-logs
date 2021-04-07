@@ -36,6 +36,25 @@ func main() {
 	rootCmd.Flags().StringArrayVarP(&ids, "id", "i", make([]string, 0), "Select container by id")
 	rootCmd.Flags().StringArrayVarP(&names, "name", "n", make([]string, 0), "Select container by name")
 	rootCmd.Flags().StringArrayVarP(&rawLabels, "label", "l", make([]string, 0), "Select container by labels")
+
+	completionCmd := &cobra.Command{
+		Use:       "completion [bash|zsh|fish|powershell]",
+		Short:     "Generate completion script",
+		ValidArgs: []string{"bash", "zsh", "fish", "powershell"},
+		Args:      cobra.ExactValidArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			switch args[0] {
+			case "bash":
+				cmd.Root().GenBashCompletion(os.Stdout)
+			case "zsh":
+				cmd.Root().GenZshCompletion(os.Stdout)
+			case "fish":
+				cmd.Root().GenFishCompletion(os.Stdout, true)
+			}
+		},
+	}
+	rootCmd.AddCommand(completionCmd)
+
 	rootCmd.Execute()
 }
 

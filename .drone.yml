@@ -3,10 +3,27 @@ type: docker
 name: amd64
 
 steps:
+- name: push-latest-commit
+  environment:
+    GIT_PUSH_SSH_KEY:
+      from_secret:
+        github_ssh_key
+  image: appleboy/drone-git-push:0.2.0-linux-amd64
+  settings:
+    remote: git@github.com:volker-raschek/container-logs.git
+    force: true
+  when:
+    repo:
+    - volker.raschek/container-logs
+    branch:
+    - master
+    event:
+    - push
+
 - name: build-linux-amd64
   image: docker.io/volkerraschek/build-image:latest
   commands:
-  - make --jobs=$(nproc) bin/linux/amd64/container-logs
+  - make bin/linux/amd64/container-logs
   when:
     event:
     - push

@@ -3,22 +3,15 @@
 # value is taken.
 VERSION?=$(shell git describe --abbrev=0)+$(shell date +'%Y%m%d%H%I%S')
 
-# GOPROXY settings
-# If no GOPROXY environment variable available, the pre-defined GOPROXY from go
-# env to download and validate go modules is used. Exclude downloading and
-# validation of all private modules which are pre-defined in GOPRIVATE. If no
-# GOPRIVATE variable defined, the variable of go env is used.
-GOPROXY?=$(shell go env GOPROXY)
-GOPRIVATE?=$(shell go env GOPRIVATE)
-
-# CONTAINER_RUNTIME
-# The CONTAINER_RUNTIME variable will be used to specified the path to a
-# container runtime. This is needed to start and run a container images.
-CONTAINER_RUNTIME?=$(shell which docker)
-CONTAINER_IMAGE_VERSION?=latest
+# DESTDIR,PREFIX
+DESTDIR?=
+PREFIX?=/usr/local
 
 # EXECUTABLE
 EXECUTABLE=container-logs
+EXECUTABLE_TARGETS= \
+	bin/linux/amd64/${EXECUTABLE} \
+	bin/tmp/${EXECUTABLE}
 
 # BUILD
 # ==============================================================================
@@ -37,6 +30,27 @@ bin/tmp/${EXECUTABLE}:
 	GOPROXY=${GOPROXY} \
 	GOPRIVATE=${GOPRIVATE} \
 		go build -ldflags "-X main.version=${VERSION:v%=%}" -o ${@} main.go
+
+# COMPLETIONS
+# ==============================================================================
+$(addsuffix .sh,${EXECUTABLE_TARGETS}): $(basename ${@})
+	$(basename ${@}) completion bash > ${@}
+
+$(addsuffix .fish,${EXECUTABLE_TARGETS}): $(basename ${@})
+	$(basename ${@}) completion fish > ${@}
+
+$(addsuffix .zsh,${EXECUTABLE_TARGETS}): $(basename ${@})
+	$(basename ${@}) completion zsh > ${@}
+
+# INSTALL
+# ==============================================================================
+install: clean bin/tmp/${EXECUTABLE} bin/tmp/${EXECUTABLE}.sh bin/tmp/${EXECUTABLE}.fish bin/tmp/${EXECUTABLE}.zsh
+	install --directory ${DESTDIR}${PREFIX}/bin/
+	install --mode 755 bin/tmp/${EXECUTABLE} ${DESTDIR}${PREFIX}/bin/${EXECUTABLE}
+	install --directory ${DESTDIR}/etc/bash_completion.d/
+	install --directory --mode 755 bin/tmp/${EXECUTABLE}.sh ${DESTDIR}/etc/bash_completion.d/${EXECUTABLE}.sh
+	install --directory ${DESTDIR}/usr/share/fish/vendor_functions.d/
+	install --directory --mode 755 bin/tmp/${EXECUTABLE}.fish ${DESTDIR}/usr/share/fish/vendor_functions.d/${EXECUTABLE}.fish
 
 # CLEAN
 # ==============================================================================
